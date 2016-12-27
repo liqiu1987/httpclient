@@ -612,7 +612,9 @@ class HttpClient{
         $header=trim($line[0]);
         if(strtolower($header)=="set-cookie"){
             $this->saveCookie(trim($line[1]));
-        }
+	    $this->response_headers[$header][]=trim($line[1]);
+	    return;
+	}
         $this->response_headers[$header]=trim($line[1]);
     }
     
