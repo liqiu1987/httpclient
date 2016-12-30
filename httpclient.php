@@ -230,7 +230,8 @@ class HttpClient{
     * @param string $content
     * @return string status code
     */
-    public function post($uri=NULL,$content=NULL,$files=NULL){
+    public function post($uri=NULL,$content=NULL,$files=NULL,$cookie=NULL){
+        $cont=null;
         if(!empty($uri)) $this->uri=$uri;
         if(is_array($content) && empty($files)){
             $content=http_build_query($content,"","&");    
@@ -250,6 +251,10 @@ class HttpClient{
                 $cont.=$file['data'].self::CRLF;
             }
             $content=$cont;
+        }
+        if(!empty($cookie))
+        {
+            $this->saveCookie($cookie);
         }
         $this->request_body=$content;
         $this->method="POST";
@@ -325,6 +330,7 @@ class HttpClient{
     * @return object ('number' => 'status number', 'msg' => 'status message')
     */
     public function status(){
+        $obj=(object)null;
         $obj->number=$this->status_code;
         $obj->msg=$this->status_msg;
         return $obj;
@@ -387,6 +393,7 @@ class HttpClient{
     */
     public function disconnect(){
         @fclose($this->socket);
+        $this->socket=null;
     }
     
     /**
@@ -612,9 +619,9 @@ class HttpClient{
         $header=trim($line[0]);
         if(strtolower($header)=="set-cookie"){
             $this->saveCookie(trim($line[1]));
-	    $this->response_headers[$header][]=trim($line[1]);
-	    return;
-	}
+            $this->response_headers[$header][]=trim($line[1]);
+            return;
+        }
         $this->response_headers[$header]=trim($line[1]);
     }
     
